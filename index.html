@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<title> D3 Abstraction experiment </title>
+<style>
+#root {
+	width: 500px;
+	height: 500px;
+}
+
+
+.Cycle {
+
+}
+
+.EpiCycle {
+
+}
+
+
+</style>
+</head>
+<body>
+<svg id="root"></svg>
+
+
+<script>
+let data = [
+	[1, 2, 5],
+	[2, 4],
+	[6]
+]
+
+function Cycles(root, data)
+{
+
+	function setDynamicProperties(selection)
+	{
+		selection.attr('transform', (d, i) => 'translate(' + (150 + Math.cos(i * 2 * Math.PI / data.length) * 100) + ', ' +  (150 + Math.sin(i* 2 * Math.PI / data.length) * 100) + ')')
+	}
+
+	var t = d3.transition().duration(2500)
+
+
+	let match = root.selectAll('.Cycle').data(data)
+
+	let enter = match.enter().append('g').attr('class', 'Cycle')
+	setDynamicProperties(enter)
+
+	enter.style("opacity", 0).transition(t).style("opacity", 1.0)
+
+	enter.append('circle').attr('r', 5)
+
+	let dynamicProperties = enter.merge(match).transition(t)
+
+	setDynamicProperties(dynamicProperties)
+
+
+	dynamicProperties.each(function(d, i) {
+		EpiCycles(d3.select(this), d)  // d is the content of the array
+	})
+
+
+	let remove = match.exit().style("opacity", 1).transition(t).style("opacity", 0).remove()
+
+}
+
+function EpiCycles(root, data)
+{
+
+	function setDynamicProperties(selection)
+	{
+		selection.attr('transform', (d, i) => 'translate(' + (Math.cos(i * 2 * Math.PI / data.length) * 30) + ', ' +  (Math.sin(i* 2 * Math.PI / data.length) * 30) + ')')
+	}
+
+	var t = d3.transition().duration(2750)
+
+	let match = root.selectAll('.EpiCycle').data(data)
+	let enter = match.enter().append('g').attr('class', 'EpiCycle')
+
+	enter.style("opacity", 0).transition(t).style("opacity", 1.0)
+
+	setDynamicProperties(enter)
+
+	enter.append('circle')
+
+	let dynamicProperties = enter.merge(match).transition(t)
+
+	dynamicProperties.select('circle').attr('r', d => d)
+
+	setDynamicProperties(dynamicProperties)
+
+	// dynamicProperties.attr('transform', (d, i) => 'translate(' + (Math.cos(i * 2 * Math.PI / data.length) * 30) + ', ' +  (Math.sin(i* 2 * Math.PI / data.length) * 30) + ')')
+
+	let remove = match.exit().style("opacity", 1).transition(t).style("opacity", 0).remove()
+}
+
+function randomData()
+{
+	let data = []
+	let mainCycles = Math.floor(Math.random() * 5)
+
+	for(var i = 0; i < mainCycles; ++i)
+	{
+		let subData = []
+		let subCycles = Math.floor(Math.random() * 5)
+
+		for(var j = 0; j < subCycles; ++j)
+		{
+			subData.push(Math.random() * 15)
+		}
+
+		data.push(subData)
+	}
+
+	console.dir(data)
+	return data
+}
+// Cycles(d3.select("#root"), randomData())
+setInterval(() => Cycles(d3.select("#root"), randomData()), 4000)
+
+
+</script>
+</body>
+</html>
+
+
+
+
